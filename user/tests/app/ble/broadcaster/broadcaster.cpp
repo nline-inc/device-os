@@ -23,7 +23,7 @@
 
 SYSTEM_MODE(MANUAL);
 
-Serial1LogHandler log(115200, LOG_LEVEL_ALL);
+SerialLogHandler log(115200, LOG_LEVEL_ALL);
 
 hal_ble_char_t bleChar1; // Read and Write
 hal_ble_char_t bleChar2; // Notify
@@ -57,33 +57,25 @@ uint8_t advDataSet2[] = {
 
 
 static void ble_on_adv_stopped(hal_ble_gap_on_adv_stopped_evt_t* event) {
-    LOG(TRACE, "BLE advertising stopped");
+    Log.trace("BLE advertising stopped");
 }
 
 static void ble_on_connected(hal_ble_gap_on_connected_evt_t* event) {
-    LOG(TRACE, "BLE connected, connection handle: 0x%04X.", event->conn_handle);
-    LOG(TRACE, "Local device role: %d.", event->role);
+    Log.trace("BLE connected, connection handle: 0x%04X.", event->conn_handle);
+    Log.trace("Local device role: %d.", event->role);
     if (event->peer_addr.addr_type <= 3) {
-        LOG(TRACE, "Peer address type: %s", addrType[event->peer_addr.addr_type]);
+        Log.trace("Peer address type: %s", addrType[event->peer_addr.addr_type]);
     }
     else {
-        LOG(TRACE, "Peer address type: Anonymous");
+        Log.trace("Peer address type: Anonymous");
     }
-    LOG(TRACE, "Peer address: %02X:%02X:%02X:%02X:%02X:%02X.", event->peer_addr.addr[0], event->peer_addr.addr[1],
+    Log.trace("Peer address: %02X:%02X:%02X:%02X:%02X:%02X.", event->peer_addr.addr[0], event->peer_addr.addr[1],
                 event->peer_addr.addr[2], event->peer_addr.addr[3], event->peer_addr.addr[4], event->peer_addr.addr[5]);
-    LOG(TRACE, "Interval: %.2fms, Latency: %d, Timeout: %dms", event->conn_interval*1.25, event->slave_latency, event->conn_sup_timeout*10);
+    Log.trace("Interval: %.2fms, Latency: %d, Timeout: %dms", event->conn_interval*1.25, event->slave_latency, event->conn_sup_timeout*10);
 }
 
 static void ble_on_disconnected(hal_ble_gap_on_disconnected_evt_t* event) {
-    LOG(TRACE, "BLE disconnected, connection handle: 0x%04X.", event->conn_handle);
-    if (event->peer_addr.addr_type <= 3) {
-        LOG(TRACE, "Peer address type: %s", addrType[event->peer_addr.addr_type]);
-    }
-    else {
-        LOG(TRACE, "Peer address type: Anonymous");
-    }
-    LOG(TRACE, "Peer address: %02X:%02X:%02X:%02X:%02X:%02X.", event->peer_addr.addr[0], event->peer_addr.addr[1],
-                event->peer_addr.addr[2], event->peer_addr.addr[3], event->peer_addr.addr[4], event->peer_addr.addr[5]);
+    Log.trace("BLE disconnected, connection handle: 0x%04X.", event->conn_handle);
 }
 
 static void ble_on_events(hal_ble_evts_t* event, void* context) {
@@ -128,11 +120,11 @@ void setup()
 /* This function loops forever --------------------------------------------*/
 void loop()
 {
-    LOG(TRACE, "Start advertising using data set 1.");
+    Log.trace("Start advertising using data set 1.");
     ble_gap_set_advertising_data(advDataSet1, sizeof(advDataSet1), NULL);
     delay(5000);
 
-    LOG(TRACE, "Start advertising using data set 2.");
+    Log.trace("Start advertising using data set 2.");
     ble_gap_set_advertising_data(advDataSet2, sizeof(advDataSet2), NULL);
     delay(5000);
 }

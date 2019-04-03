@@ -23,7 +23,7 @@
 
 SYSTEM_MODE(MANUAL);
 
-Serial1LogHandler log(115200, LOG_LEVEL_ALL);
+SerialLogHandler log(115200, LOG_LEVEL_ALL);
 
 hal_ble_char_handles_t char1Handles; // Read and Write
 hal_ble_char_handles_t char2Handles; // Notify
@@ -155,48 +155,40 @@ static int encodeScanResponseData(uint8_t ads_type, uint8_t* data, uint16_t len,
 }
 
 static void ble_on_adv_stopped(hal_ble_gap_on_adv_stopped_evt_t* event) {
-    LOG(TRACE, "BLE advertising stopped");
+    Log.trace("BLE advertising stopped");
 }
 
 static void ble_on_connected(hal_ble_gap_on_connected_evt_t* event) {
-    LOG(TRACE, "BLE connected, connection handle: 0x%04X.", event->conn_handle);
-    LOG(TRACE, "Local device role: %d.", event->role);
+    Log.trace("BLE connected, connection handle: 0x%04X.", event->conn_handle);
+    Log.trace("Local device role: %d.", event->role);
     if (event->peer_addr.addr_type <= 3) {
-        LOG(TRACE, "Peer address type: %s", addrType[event->peer_addr.addr_type]);
+        Log.trace("Peer address type: %s", addrType[event->peer_addr.addr_type]);
     }
     else {
-        LOG(TRACE, "Peer address type: Anonymous");
+        Log.trace("Peer address type: Anonymous");
     }
-    LOG(TRACE, "Peer address: %02X:%02X:%02X:%02X:%02X:%02X.", event->peer_addr.addr[0], event->peer_addr.addr[1],
+    Log.trace("Peer address: %02X:%02X:%02X:%02X:%02X:%02X.", event->peer_addr.addr[0], event->peer_addr.addr[1],
                 event->peer_addr.addr[2], event->peer_addr.addr[3], event->peer_addr.addr[4], event->peer_addr.addr[5]);
-    LOG(TRACE, "Interval: %.2fms, Latency: %d, Timeout: %dms", event->conn_interval*1.25, event->slave_latency, event->conn_sup_timeout*10);
+    Log.trace("Interval: %.2fms, Latency: %d, Timeout: %dms", event->conn_interval*1.25, event->slave_latency, event->conn_sup_timeout*10);
 }
 
 static void ble_on_disconnected(hal_ble_gap_on_disconnected_evt_t* event) {
-    LOG(TRACE, "BLE disconnected, connection handle: 0x%04X.", event->conn_handle);
-    if (event->peer_addr.addr_type <= 3) {
-        LOG(TRACE, "Peer address type: %s", addrType[event->peer_addr.addr_type]);
-    }
-    else {
-        LOG(TRACE, "Peer address type: Anonymous");
-    }
-    LOG(TRACE, "Peer address: %02X:%02X:%02X:%02X:%02X:%02X.", event->peer_addr.addr[0], event->peer_addr.addr[1],
-                event->peer_addr.addr[2], event->peer_addr.addr[3], event->peer_addr.addr[4], event->peer_addr.addr[5]);
+    Log.trace("BLE disconnected, connection handle: 0x%04X.", event->conn_handle);
 }
 
 static void ble_on_connection_parameters_updated(hal_ble_gap_on_conn_params_evt_t* event) {
-    LOG(TRACE, "BLE connection parameters updated, connection handle: 0x%04X.", event->conn_handle);
-    LOG(TRACE, "Interval: %.2fms, Latency: %d, Timeout: %dms", event->conn_interval*1.25, event->slave_latency, event->conn_sup_timeout*10);
+    Log.trace("BLE connection parameters updated, connection handle: 0x%04X.", event->conn_handle);
+    Log.trace("Interval: %.2fms, Latency: %d, Timeout: %dms", event->conn_interval*1.25, event->slave_latency, event->conn_sup_timeout*10);
 }
 
 static void ble_on_data_received(hal_ble_gatt_on_data_evt_t* event) {
-    LOG(TRACE, "BLE data received, connection handle: 0x%04X.", event->conn_handle);
+    Log.trace("BLE data received, connection handle: 0x%04X.", event->conn_handle);
 
     if (event->attr_handle == char1Handles.value_handle) {
-        LOG(TRACE, "Write BLE characteristic 1 value:");
+        Log.trace("Write BLE characteristic 1 value:");
     }
     else if (event->attr_handle == char2Handles.cccd_handle) {
-        LOG(TRACE, "Configure BLE characteristic 2 CCCD:");
+        Log.trace("Configure BLE characteristic 2 CCCD:");
         if (event->data[0] == 0x01) {
             notifyEnabled = true;
         }
@@ -205,16 +197,16 @@ static void ble_on_data_received(hal_ble_gatt_on_data_evt_t* event) {
         }
     }
     else if (event->attr_handle == char3Handles.value_handle) {
-        LOG(TRACE, "Write BLE characteristic 3 value:");
+        Log.trace("Write BLE characteristic 3 value:");
     }
     else {
-        LOG(TRACE, "BLE received data, attribute handle: %d.", event->attr_handle);
+        Log.trace("BLE received data, attribute handle: %d.", event->attr_handle);
     }
 
     for (uint8_t i = 0; i < event->data_len; i++) {
-        Serial1.printf("0x%02X,", event->data[i]);
+        Log.printf("0x%02X,", event->data[i]);
     }
-    Serial1.print("\r\n");
+    Log.print("\r\n");
 }
 
 static void ble_on_events(hal_ble_evts_t* event, void* context) {

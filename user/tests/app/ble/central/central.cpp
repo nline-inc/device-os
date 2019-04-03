@@ -23,7 +23,7 @@
 
 SYSTEM_MODE(MANUAL);
 
-Serial1LogHandler log(115200, LOG_LEVEL_ALL);
+SerialLogHandler log(115200, LOG_LEVEL_ALL);
 
 uint8_t  svc1Uuid[]  = {0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x08,0x09,0x0a,0x0b,0x00,0x00,0x0e,0x0f};
 uint8_t  char1Uuid[] = {0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x08,0x09,0x0a,0x0b,0x01,0x00,0x0e,0x0f};
@@ -106,7 +106,7 @@ static void ble_on_scan_result(hal_ble_gap_on_scan_result_evt_t* event) {
     if (devNameLen != 0 && devNameLen < sizeof(devName)) {
         devName[devNameLen] = '\0';
         if (!strcmp((const char*)devName, "Xenon BLE Sample")) {
-            LOG(TRACE, "Target device found. Start connecting...");
+            Log.trace("Target device found. Start connecting...");
             hal_ble_conn_params_t params;
             params.max_conn_interval = 100;
             params.min_conn_interval = 100;
@@ -118,32 +118,23 @@ static void ble_on_scan_result(hal_ble_gap_on_scan_result_evt_t* event) {
 }
 
 static void ble_on_connected(hal_ble_gap_on_connected_evt_t* event) {
-    LOG(TRACE, "BLE connected, connection handle: 0x%04X.", event->conn_handle);
-    LOG(TRACE, "Local device role: %d.", event->role);
+    Log.trace("BLE connected, connection handle: 0x%04X.", event->conn_handle);
+    Log.trace("Local device role: %d.", event->role);
     if (event->peer_addr.addr_type <= 3) {
-        LOG(TRACE, "Peer address type: %s", addrType[event->peer_addr.addr_type]);
+        Log.trace("Peer address type: %s", addrType[event->peer_addr.addr_type]);
     }
     else {
-        LOG(TRACE, "Peer address type: Anonymous");
+        Log.trace("Peer address type: Anonymous");
     }
-    LOG(TRACE, "Peer address: %02X:%02X:%02X:%02X:%02X:%02X.", event->peer_addr.addr[0], event->peer_addr.addr[1],
+    Log.trace("Peer address: %02X:%02X:%02X:%02X:%02X:%02X.", event->peer_addr.addr[0], event->peer_addr.addr[1],
                 event->peer_addr.addr[2], event->peer_addr.addr[3], event->peer_addr.addr[4], event->peer_addr.addr[5]);
-    LOG(TRACE, "Interval: %.2fms, Latency: %d, Timeout: %dms", event->conn_interval*1.25, event->slave_latency, event->conn_sup_timeout*10);
+    Log.trace("Interval: %.2fms, Latency: %d, Timeout: %dms", event->conn_interval*1.25, event->slave_latency, event->conn_sup_timeout*10);
 
     connHandle = event->conn_handle;
 }
 
 static void ble_on_disconnected(hal_ble_gap_on_disconnected_evt_t* event) {
-    LOG(TRACE, "BLE disconnected, connection handle: 0x%04X.", event->conn_handle);
-    if (event->peer_addr.addr_type <= 3) {
-        LOG(TRACE, "Peer address type: %s", addrType[event->peer_addr.addr_type]);
-    }
-    else {
-        LOG(TRACE, "Peer address type: Anonymous");
-    }
-    LOG(TRACE, "Peer address: %02X:%02X:%02X:%02X:%02X:%02X.", event->peer_addr.addr[0], event->peer_addr.addr[1],
-                event->peer_addr.addr[2], event->peer_addr.addr[3], event->peer_addr.addr[4], event->peer_addr.addr[5]);
-
+    Log.trace("BLE disconnected, connection handle: 0x%04X.", event->conn_handle);
     connHandle = BLE_INVALID_CONN_HANDLE;
 }
 
@@ -154,17 +145,17 @@ static void ble_on_services_discovered(hal_ble_gattc_on_svc_disc_evt_t* event) {
         if (event->services[i].uuid.type == BLE_UUID_TYPE_16BIT) {
             if (event->services[i].uuid.uuid16 == svc3Uuid) {
                 service = &service3;
-                LOG(TRACE, "BLE Service3 found.");
+                Log.trace("BLE Service3 found.");
             }
         }
         else if (event->services[i].uuid.type == BLE_UUID_TYPE_128BIT) {
             if (!memcmp(svc1Uuid, event->services[i].uuid.uuid128, BLE_SIG_UUID_128BIT_LEN)) {
                 service = &service1;
-                LOG(TRACE, "BLE Service1 found.");
+                Log.trace("BLE Service1 found.");
             }
             else if (!memcmp(svc2Uuid, event->services[i].uuid.uuid128, BLE_SIG_UUID_128BIT_LEN)) {
                 service = &service2;
-                LOG(TRACE, "BLE Service2 found.");
+                Log.trace("BLE Service2 found.");
             }
         }
         if (service != NULL) {
@@ -179,17 +170,17 @@ static void ble_on_characteristics_discovered(hal_ble_gattc_on_char_disc_evt_t* 
         if (event->characteristics[i].uuid.type == BLE_UUID_TYPE_16BIT) {
             if (event->characteristics[i].uuid.uuid16 == char3Uuid) {
                 characteristic = &char3;
-                LOG(TRACE, "BLE Characteristic3 found.");
+                Log.trace("BLE Characteristic3 found.");
             }
         }
         else if (event->characteristics[i].uuid.type == BLE_UUID_TYPE_128BIT) {
             if (!memcmp(char1Uuid, event->characteristics[i].uuid.uuid128, BLE_SIG_UUID_128BIT_LEN)) {
                 characteristic = &char1;
-                LOG(TRACE, "BLE Characteristic1 found.");
+                Log.trace("BLE Characteristic1 found.");
             }
             else if (!memcmp(char2Uuid, event->characteristics[i].uuid.uuid128, BLE_SIG_UUID_128BIT_LEN)) {
                 characteristic = &char2;
-                LOG(TRACE, "BLE Characteristic2 found.");
+                Log.trace("BLE Characteristic2 found.");
             }
         }
         if (characteristic != NULL) {
@@ -202,28 +193,28 @@ static void ble_on_descriptors_discovered(hal_ble_gattc_on_desc_disc_evt_t* even
     for (uint8_t i = 0; i < event->count; i++) {
         if (event->descriptors[i].uuid.uuid16 == BLE_SIG_UUID_CLIENT_CHAR_CONFIG_DESC) {
             char2.cccd_handle = event->descriptors[i].handle;
-            LOG(TRACE, "BLE Characteristic2 CCCD found.");
+            Log.trace("BLE Characteristic2 CCCD found.");
         }
     }
 }
 
 static void ble_on_data_received(hal_ble_gatt_on_data_evt_t* event) {
-    LOG(TRACE, "BLE data received, connection handle: 0x%04X.", event->conn_handle);
+    Log.trace("BLE data received, connection handle: 0x%04X.", event->conn_handle);
 
     if (event->attr_handle == char1.value_handle) {
-        LOG(TRACE, "Read BLE characteristic 1 value:");
+        Log.trace("Read BLE characteristic 1 value:");
     }
     else if (event->attr_handle == char2.value_handle) {
-        LOG(TRACE, "Notified BLE characteristic 2 value:");
+        Log.trace("Notified BLE characteristic 2 value:");
     }
     else {
-        LOG(TRACE, "BLE received data, attribute handle: %d.", event->attr_handle);
+        Log.trace("BLE received data, attribute handle: %d.", event->attr_handle);
     }
 
     for (uint8_t i = 0; i < event->data_len; i++) {
-        Serial1.printf("0x%02X,", event->data[i]);
+        Log.printf("0x%02X,", event->data[i]);
     }
-    Serial1.print("\r\n");
+    Log.print("\r\n");
 }
 
 static void ble_on_events(hal_ble_evts_t* event, void* context) {

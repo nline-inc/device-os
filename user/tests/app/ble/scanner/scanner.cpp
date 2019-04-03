@@ -23,7 +23,7 @@
 
 SYSTEM_MODE(MANUAL);
 
-Serial1LogHandler log(115200, LOG_LEVEL_ALL);
+SerialLogHandler log(115200, LOG_LEVEL_ALL);
 
 const char* addrType[4] = {
     "Public",
@@ -87,47 +87,47 @@ static int decodeAdvertisingData(uint8_t ads_type, const uint8_t* adv_data, uint
 
 static void ble_on_scan_result(hal_ble_gap_on_scan_result_evt_t* event) {
     if (event->type.scan_response) {
-        LOG(TRACE, "BLE Scan Response event");
+        Log.trace("BLE Scan Response event");
     }
     else if (event->type.connectable) {
-        LOG(TRACE, "BLE Advertising Connectable event");
+        Log.trace("BLE Advertising Connectable event");
     }
     else if (event->type.scannable) {
-        LOG(TRACE, "BLE Advertising Scannable event");
+        Log.trace("BLE Advertising Scannable event");
     }
     else if (event->type.directed) {
-        LOG(TRACE, "BLE Advertising Directed event");
+        Log.trace("BLE Advertising Directed event");
     }
     else if (event->type.extended_pdu) {
-        LOG(TRACE, "BLE Advertising Extended PDU event");
+        Log.trace("BLE Advertising Extended PDU event");
     }
-    LOG(TRACE, "RSSI: %i dBm", event->rssi);
+    Log.trace("RSSI: %i dBm", event->rssi);
     if (event->peer_addr.addr_type <= 3) {
-        LOG(TRACE, "Peer address type: %s", addrType[event->peer_addr.addr_type]);
+        Log.trace("Peer address type: %s", addrType[event->peer_addr.addr_type]);
     }
     else {
-        LOG(TRACE, "Peer address type: Anonymous");
+        Log.trace("Peer address type: Anonymous");
     }
-    LOG(TRACE, "Peer address: %02X:%02X:%02X:%02X:%02X:%02X.", event->peer_addr.addr[0], event->peer_addr.addr[1],
+    Log.trace("Peer address: %02X:%02X:%02X:%02X:%02X:%02X.", event->peer_addr.addr[0], event->peer_addr.addr[1],
                 event->peer_addr.addr[2], event->peer_addr.addr[3], event->peer_addr.addr[4], event->peer_addr.addr[5]);
 
     if (event->data_len != 0) {
-        LOG(TRACE, "Data payload: ");
+        Log.trace("Data payload: ");
         for (uint8_t i = 0; i < event->data_len; i++) {
-            Serial1.printf("%02X ", event->data[i]);
+            Log.printf("%02X ", event->data[i]);
         }
-        Serial1.print("\r\n");
+        Log.print("\r\n");
     }
 
     uint8_t  mfgData[31];
     uint16_t mfgDataLen = sizeof(mfgData);
     decodeAdvertisingData(BLE_SIG_AD_TYPE_MANUFACTURER_SPECIFIC_DATA, event->data, event->data_len, mfgData, &mfgDataLen);
     if (mfgDataLen != 0) {
-        LOG(TRACE, "Manufacturing data found: ");
+        Log.trace("Manufacturing data found: ");
         for (uint8_t i = 0; i < mfgDataLen; i++) {
-            Serial1.printf("%02X ", mfgData[i]);
+            Log.printf("%02X ", mfgData[i]);
         }
-        Serial1.print("\r\n");
+        Log.print("\r\n");
     }
 
     uint8_t  shortName[31];
@@ -135,23 +135,23 @@ static void ble_on_scan_result(hal_ble_gap_on_scan_result_evt_t* event) {
     decodeAdvertisingData(BLE_SIG_AD_TYPE_SHORT_LOCAL_NAME, event->data, event->data_len, shortName, &shortNameLen);
     if (shortNameLen != 0) {
         shortName[shortNameLen] = '\0';
-        LOG(TRACE, "Shorted device name found: %s\r\n", shortName);
+        Log.trace("Shorted device name found: %s\r\n", shortName);
     }
 
     uint8_t  uuid128[31];
     uint16_t uuidLen = sizeof(uuid128);
     decodeAdvertisingData(BLE_SIG_AD_TYPE_128BIT_SERVICE_UUID_MORE_AVAILABLE, event->data, event->data_len, uuid128, &uuidLen);
     if (uuidLen != 0) {
-        LOG(TRACE, "128-bits UUID found: ");
+        Log.trace("128-bits UUID found: ");
         for (uint8_t i = 0; i < uuidLen; i++) {
-            Serial1.printf("%02X ", uuid128[i]);
+            Log.printf("%02X ", uuid128[i]);
         }
-        Serial1.print("\r\n");
+        Log.print("\r\n");
     }
 }
 
 static void ble_on_scan_stopped(hal_ble_gap_on_scan_stopped_evt_t* event) {
-    LOG(TRACE, "BLE scan stopped.");
+    Log.trace("BLE scan stopped.");
 }
 
 static void ble_on_events(hal_ble_evts_t* event, void* context) {
