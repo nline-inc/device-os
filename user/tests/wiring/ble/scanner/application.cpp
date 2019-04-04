@@ -25,7 +25,7 @@
 
 SYSTEM_MODE(MANUAL);
 
-Serial1LogHandler log(115200, LOG_LEVEL_ALL);
+SerialLogHandler log(115200, LOG_LEVEL_ALL);
 
 BleScanResult results[SCAN_RESULT_COUNT];
 
@@ -41,28 +41,28 @@ void loop() {
         uint8_t buf[BleAdvertisingData::MAX_LEN];
         size_t len;
 
-        LOG(TRACE, "%d devices are found:", count);
+        Log.trace("%d devices are found:", count);
         for (int i = 0; i < count; i++) {
-            LOG(TRACE, "devices %d: %d - %02X:%02X:%02X:%02X:%02X:%02X", i, results[i].rssi,
+            Log.trace("devices %d: %d - %02X:%02X:%02X:%02X:%02X:%02X", i, results[i].rssi,
                     results[i].address[0], results[i].address[1], results[i].address[2],
                     results[i].address[3], results[i].address[4], results[i].address[5]);
 
             len = results[i].advertisingData(buf, sizeof(buf));
             if (len > 0) {
-                LOG(TRACE, "Advertising data:");
+                Log.trace("Advertising data:");
                 for (size_t j = 0; j < len; j++) {
-                    Serial1.printf("0x%02x, ", buf[j]);
+                    Log.printf("0x%02x, ", buf[j]);
                 }
-                Serial1.println("\r\n");
+                Log.print("\r\n");
             }
 
             len = results[i].scanResponse(buf, sizeof(buf));
             if (len > 0) {
-                LOG(TRACE, "Scan response data:");
+                Log.trace("Scan response data:");
                 for (size_t j = 0; j < len; j++) {
-                    Serial1.printf("0x%02x, ", buf[j]);
+                    Log.printf("0x%02x, ", buf[j]);
                 }
-                Serial1.println("\r\n");
+                Log.print("\r\n");
             }
         }
     }

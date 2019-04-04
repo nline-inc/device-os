@@ -33,9 +33,11 @@ uint8_t txBuf[UART_TX_BUF_SIZE];
 size_t txLen = 0;
 
 void onDataReceived(const uint8_t* data, size_t len) {
+    Serial.lock();
     for (uint8_t i = 0; i < len; i++) {
         Serial.write(data[i]);
     }
+    Serial.unlock();
 }
 
 void setup() {
@@ -45,9 +47,12 @@ void setup() {
 
 void loop() {
     if (peer.connected()) {
+        Serial.lock();
         while (Serial.available() && txLen < UART_TX_BUF_SIZE) {
             txBuf[txLen++] = Serial.read();
         }
+        Serial.unlock();
+
         if (txLen > 0) {
             peerRxCharacteristic.setValue(txBuf, txLen);
             txLen = 0;

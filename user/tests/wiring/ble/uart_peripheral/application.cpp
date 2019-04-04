@@ -40,9 +40,11 @@ size_t txLen = 0;
 
 
 void onDataReceived(const uint8_t* data, size_t len) {
+    Serial.lock();
     for (uint8_t i = 0; i < len; i++) {
         Serial.write(data[i]);
     }
+    Serial.unlock();
 }
 
 void setup() {
@@ -58,9 +60,11 @@ void setup() {
 
 void loop() {
     if (BLE.connected()) {
+        Serial.lock();
         while (Serial.available() && txLen < UART_TX_BUF_SIZE) {
             txBuf[txLen++] = Serial.read();
         }
+        Serial.unlock();
 
         if (txLen > 0) {
             txCharacteristic.setValue(txBuf, txLen);
