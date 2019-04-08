@@ -59,11 +59,11 @@ static void nfcEventCallback(nfc_event_type_t type, nfc_event_t* event, void* ct
 }
 
 void onDataReceived(const uint8_t* data, size_t len) {
-    Serial.lock();
-    for (uint8_t i = 0; i < len; i++) {
-        Serial.write(data[i]);
+    WITH_LOCK(Serial) {
+        for (uint8_t i = 0; i < len; i++) {
+            Serial.write(data[i]);
+        }
     }
-    Serial.unlock();
 
     char text[len + 1] = {0};
     memcpy(text, data, len);
@@ -92,11 +92,11 @@ void setup() {
 
 void loop() {
     if (BLE.connected()) {
-        Serial.lock();
-        while (Serial.available() && txLen < UART_TX_BUF_SIZE) {
-            txBuf[txLen++] = Serial.read();
+        WITH_LOCK(Serial) {
+            while (Serial.available() && txLen < UART_TX_BUF_SIZE) {
+                txBuf[txLen++] = Serial.read();
+            }
         }
-        Serial.unlock();
 
         if (txLen > 0) {
             txCharacteristic.setValue(txBuf, txLen);
